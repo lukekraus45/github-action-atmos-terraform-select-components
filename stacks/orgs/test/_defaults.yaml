@@ -1,0 +1,8 @@
+vars:
+  namespace: tst
+  environment: ue2
+  label_order:
+    - namespace
+    - tenant
+    - environment
+    - stage

@@ -1,0 +1,108 @@
+---
+#
+# This is the canonical configuration for the `README.md`
+# Run `make readme` to rebuild the `README.md`
+#
+
+name: github-action-atmos-terraform-select-components
+
+tags:
+  - github-action
+  - atmos
+  - terraform
+
+license: "APACHE2"
+
+github_repo: cloudposse/github-action-atmos-terraform-select-components
+
+badges:
+  - name: "Latest Release"
+    image: "https://img.shields.io/github/release/cloudposse/github-action-atmos-terraform-select-components.svg"
+    url: "https://github.com/cloudposse/github-action-atmos-terraform-select-components/releases/latest"
+  - name: "Slack Community"
+    image: "https://slack.cloudposse.com/badge.svg"
+    url: "https://slack.cloudposse.com"
+
+related: []
+
+description: GitHub Action that outputs list of Atmos components by jq query
+
+introduction: |-
+  GitHub Action that outputs list of Atmos components by jq query.
+
+  For example following query will fetch components that have in settings set `github.actions_enabled: true`:
+
+  ```
+  to_entries[] | .key as $parent | .value.components.terraform | to_entries[] | select(.value.settings.github.actions_enabled // false) | [$parent, .key] | join(",")
+  ```
+
+  Output of this action is a list of basic component information. For example:
+
+  ```json
+  [
+    {
+    "stack": "plat-ue2-sandbox",
+    "component": "test-component-01",
+    "stack_slug": "plat-ue2-sandbox-test-component-01",
+    "component_path": "components/terraform/s3-bucket"
+    }
+  ]
+  ```
+
+references:
+  - name: "github-action-atmos-terraform-drift-detection"
+    description: "Companion GitHub Action for drift detection"
+    url: "https://github.com/cloudposse/github-action-atmos-terraform-drift-detection"
+  - name: "github-action-atmos-terraform-drift-remediation"
+    description: "Companion GitHub Action for drift remediation"
+    url: "https://github.com/cloudposse/github-action-atmos-terraform-drift-remediation"
+  - name: "github-actions-workflows"
+    description: "Reusable workflows for different types of projects"
+    url: "https://github.com/cloudposse/github-actions-workflows"
+  - name: "example-github-action-release-workflow"
+    description: "Example application with complicated release workflow"
+    url: "https://github.com/cloudposse/example-github-action-release-workflow"
+
+usage: |
+  ### GitHub Actions Workflow Example
+
+  In following GitHub workflow example first job will filter components that have settings `github.actions_enabled: true` and then in following job `stack_slug` will be printed to stdout.
+
+  ```yaml
+    jobs:
+      selected-components:
+        runs-on: ubuntu-latest
+        name: Select Components
+        outputs:
+          matrix: ${{ steps.components.outputs.matrix }}
+        steps:
+          - name: Selected Components
+            id: components
+            uses: cloudposse/github-action-atmos-terraform-select-components@v0
+            with:
+              atmos-config-path: "${{ github.workspace }}/rootfs/usr/local/etc/atmos/"
+              jq-query: 'to_entries[] | .key as $parent | .value.components.terraform | to_entries[] | select(.value.settings.github.actions_enabled // false) | [$parent, .key] | join(",")'
+
+      print-stack-slug:
+        runs-on: ubuntu-latest
+        needs:
+          - selected-components
+        if: ${{ needs.selected-components.outputs.matrix != '{"include":[]}' }}
+        strategy:
+          matrix: ${{ fromJson(needs.selected-components.outputs.matrix) }}
+        name: ${{ matrix.stack_slug }}
+        steps:
+          - name: echo 
+            run:
+              echo "${{ matrix.stack_slug }}"
+  ```
+
+include:
+
+contributors:
+  - name: "Zinovii Dmytriv"
+    github: "zdmytriv"
+  - name: "Erik Osterman"
+    github: "osterman"
+  - name: "Daniel Miller"
+    github: "milldr"
