@@ -140,14 +140,7 @@ runs:
             })
           ) | map(.) | flatten                                          ## Reduce to flat array
       run: |
-        base_cmd= "atmos describe stacks --format json"
-        
-        if [[ "${{ inputs.process-functions }}" == "false" ]]; then
-          base_cmd+=" --process-functions=false"
-        fi       
-        
-        final_cmd= base_cmd+=" | jq -ce "${JQUERY}" > components.json" 
-        eval "$final_cmd"
+        atmos describe stacks --process-functions=${{ inputs.atmos-process-function }} --format json | jq -ce "${JQUERY}" > components.json
         components=$(cat components.json)
         echo "Selected components: $components"
         printf "%s" "components=$components" >> $GITHUB_OUTPUT
