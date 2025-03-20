@@ -40,6 +40,10 @@ inputs:
     required: false
     description: 'Whether to process atmos functions'
     default: true
+  process-templates:
+    required: false
+    description: "Whether to process templates"
+    default: "true"    
 outputs:
   selected-components:
     description: Selected GitOps components
@@ -143,6 +147,9 @@ runs:
         process_function_arg=""
         if [ "${{ inputs.process-functions }}" == "false" ]; then
           process_function_arg="--process-functions=false"
+        fi
+        if [ "${{ inputs.process-templates }}" == "false" ]; then
+          process_function_arg="--process-templates=false"
         fi
         atmos describe stacks $process_function_arg --format json | jq -ce "${JQUERY}" > components.json
         components=$(cat components.json)
