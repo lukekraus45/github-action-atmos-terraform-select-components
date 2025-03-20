@@ -144,7 +144,7 @@ runs:
             })
           ) | map(.) | flatten                                          ## Reduce to flat array
       run: |
-        flags=""
+        flags=" "
         if [ "${{ inputs.process-functions }}" == "false" ]; then
           flags += " --process-functions=false"
         fi
