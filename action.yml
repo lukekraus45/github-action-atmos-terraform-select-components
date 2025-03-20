@@ -144,17 +144,20 @@ runs:
             })
           ) | map(.) | flatten                                          ## Reduce to flat array
       run: |
-        flags=" "
+        flags=""
+        
         if [ "${{ inputs.process-functions }}" == "false" ]; then
-          flags += " --process-functions=false"
+          flags+=" --process-functions=false"
         fi
+        
         if [ "${{ inputs.process-templates }}" == "false" ]; then
-          flags += "--process-templates=false"
+          flags+=" --process-templates=false"
         fi
+        
         atmos describe stacks $flags --format json | jq -ce "${JQUERY}" > components.json
         components=$(cat components.json)
         echo "Selected components: $components"
-        printf "%s" "components=$components" >> $GITHUB_OUTPUT    
+        printf "%s" "components=$components" >> $GITHUB_OUTPUT  
     - uses: cloudposse/github-action-matrix-extended@v0
       id: matrix
       with:
