@@ -144,14 +144,14 @@ runs:
             })
           ) | map(.) | flatten                                          ## Reduce to flat array
       run: |
-        process_function_arg=""
+        flags=""
         if [ "${{ inputs.process-functions }}" == "false" ]; then
-          process_function_arg="--process-functions=false"
+          flags += " --process-functions=false"
         fi
         if [ "${{ inputs.process-templates }}" == "false" ]; then
-          process_function_arg="--process-templates=false"
+          flags += "--process-templates=false"
         fi
-        atmos describe stacks $process_function_arg --format json | jq -ce "${JQUERY}" > components.json
+        atmos describe stacks $flags --format json | jq -ce "${JQUERY}" > components.json
         components=$(cat components.json)
         echo "Selected components: $components"
         printf "%s" "components=$components" >> $GITHUB_OUTPUT    
